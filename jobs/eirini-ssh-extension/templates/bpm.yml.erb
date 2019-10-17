@@ -1,0 +1,21 @@
+processes:
+  - name: eirini-ssh-extension
+    executable: /var/vcap/packages/eirini-ssh-extension/bin/eirini-ssh-extension
+    args: []
+    env:
+      KUBERNETES_SERVICE_HOST: "<%= p("eirini-ssh-extension.kube_service_host") %>"
+      KUBERNETES_SERVICE_PORT: "<%= p("eirini-ssh-extension.kube_service_port") %>"
+      OPERATOR_WEBHOOK_HOST: "<%= p("eirini-ssh-extension.operator_webhook_host") %>"
+      OPERATOR_WEBHOOK_PORT: "<%= p("eirini-ssh-extension.operator_webhook_port") %>"
+      NAMESPACE: "<%= p("eirini-ssh-extension.namespace") %>"
+    <% if properties.opi&.k8s&.host_url.nil? %>
+    # The ServiceAccount admission controller has to be enabled.
+    # https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod
+    additional_volumes:
+    - path: /var/run/secrets/kubernetes.io/serviceaccount/token
+      mount_only: true
+    - path: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      mount_only: true
+    - path: /var/run/secrets/kubernetes.io/serviceaccount/namespace
+      mount_only: true
+    <% end %>
